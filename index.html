@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniID - Sistema de Identidad Digital Soberana y Post-Cuántica</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Background cybernetic mesh glow -->
+    <div class="cyber-bg-glow"></div>
+    <div class="cyber-grid"></div>
+
+    <header class="app-header">
+        <div class="header-logo">
+            <svg class="shield-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L3 7V12C3 17.5 7.1 21.6 12 23C16.9 21.6 21 17.5 21 12V7L12 2Z" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 7V17" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round"/>
+                <path d="M9 12H15" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round"/>
+                <defs>
+                    <linearGradient id="logo-grad" x1="3" y1="2" x2="21" y2="23" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#8b5cf6"/>
+                        <stop offset="0.5" stop-color="#6366f1"/>
+                        <stop offset="1" stop-color="#10b981"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            <div class="logo-text">
+                <h1>OmniID</h1>
+                <span class="tagline">Sovereign Identity System</span>
+            </div>
+        </div>
+        <div class="lang-container" style="margin-right: 15px;">
+            <select id="lang-selector" style="background: #131422; color: #ffffff; border: 1px solid #4a5568; border-radius: 4px; padding: 6px 10px; font-family: 'Outfit'; font-weight: 600; cursor: pointer;">
+                <option value="es" style="background: #131422;">ES - Español</option>
+                <option value="en" style="background: #131422;">EN - English</option>
+                <option value="fr" style="background: #131422;">FR - Français</option>
+                <option value="zh" style="background: #131422;">ZH - 中文</option>
+                <option value="ar" style="background: #131422;">AR - العربية</option>
+                <option value="ru" style="background: #131422;">RU - Русский</option>
+                <option value="pt" style="background: #131422;">PT - Português</option>
+                <option value="de" style="background: #131422;">DE - Deutsch</option>
+            </select>
+        </div>
+        <div class="network-badge">
+            <span class="badge-dot pulse"></span>
+            <span class="badge-label">Hyperledger Indy: ONLINE</span>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <!-- SECCIÓN IZQUIERDA: EMISIÓN Y TARJETA FÍSICA -->
+        <div class="dash-column">
+            
+            <!-- PANEL 1: EMISIÓN -->
+            <section class="dash-panel card-issuer" id="panel-issuer">
+                <div class="panel-header">
+                    <div class="panel-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    </div>
+                    <h2 id="panel-issuer-title">1. Portal de Emisión Nacional (KYC)</h2>
+                </div>
+                <div class="panel-body">
+                    <p class="panel-desc" id="panel-issuer-desc">Enrolamiento biométrico y generación criptográfica FPE del identificador.</p>
+                    <form id="enroll-form" onsubmit="event.preventDefault(); enrollUser();">
+                        <div class="form-group">
+                            <label for="input-fullname" id="lbl-fullname">Nombre Completo</label>
+                            <input type="text" id="input-fullname" required placeholder="Ej. Joaquin Obando" value="Joaquin Obando">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="input-national-id" id="lbl-national-id">Documento de Identidad (DNI/Pasaporte)</label>
+                                <input type="text" id="input-national-id" required placeholder="Ej. 001-123456-0000A" value="001-123456-0000A">
+                            </div>
+                            <div class="form-group">
+                                <label for="input-nationality" id="lbl-nationality">Nacionalidad</label>
+                                <select id="input-nationality">
+                                    <option value="Nicaragüense">Nicaragüense</option>
+                                    <option value="Costarricense">Costarricense</option>
+                                    <option value="Española">Española</option>
+                                    <option value="Colombiana">Colombiana</option>
+                                    <option value="Estadounidense">Estadounidense</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="input-dob" id="lbl-dob">Fecha Nacimiento</label>
+                                <input type="date" id="input-dob" required value="2000-05-15">
+                            </div>
+                            <div class="form-group">
+                                <label for="input-gender" id="lbl-gender">Género</label>
+                                <select id="input-gender">
+                                    <option value="M">Masculino (M)</option>
+                                    <option value="F">Femenino (F)</option>
+                                    <option value="X">No Binario (X)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="input-region" id="lbl-region">Dirección de Residencia</label>
+                            <input type="text" id="input-region" required placeholder="Ciudad, País" value="Managua, Nicaragua">
+                        </div>
+                        <div class="biometric-enroll">
+                            <div class="bio-scanner-box" id="bio-scanner" onclick="triggerBioScan()">
+                                <div class="scanner-laser"></div>
+                                <svg class="fingerprint-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M12 2a10 10 0 0 0-8 8.4" stroke-linecap="round"/>
+                                    <path d="M12 6a6 6 0 0 0-5.7 4.2" stroke-linecap="round"/>
+                                    <path d="M12 10a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0v-6a2 2 0 0 0-2-2z" stroke-linecap="round"/>
+                                    <path d="M12 14v4" stroke-linecap="round"/>
+                                    <path d="M16 10a4 4 0 0 0-4-4" stroke-linecap="round"/>
+                                    <path d="M20 10.4A10 10 0 0 0 12 2" stroke-linecap="round"/>
+                                    <path d="M6 18a10 10 0 0 0 12 0" stroke-linecap="round"/>
+                                    <path d="M8 15a6 6 0 0 0 8 0" stroke-linecap="round"/>
+                                </svg>
+                                <span id="bio-scan-status">Capturar Huella Digital</span>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-glow" id="btn-submit-enroll">
+                            <span>Acuñar Credencial OmniID</span>
+                            <div class="btn-glow-bg"></div>
+                        </button>
+                    </form>
+                    <div id="enroll-result" class="enroll-result-card hidden">
+                        <div class="result-header">
+                            <span class="status-badge success">Acuñado Correctamente</span>
+                        </div>
+                        <div class="result-details">
+                            <div><strong>DID Generado:</strong> <span id="res-did" class="mono-text"></span></div>
+                            <div><strong>Identificador Único:</strong> <span id="res-id" class="mono-text highlight-text"></span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PANEL 2: CÉDULA FÍSICA -->
+            <section class="dash-panel card-virtual" id="panel-physical">
+                <div class="panel-header">
+                    <div class="panel-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    </div>
+                    <h2 id="panel-virtual-title">2. Cédula Virtual (Portal Web)</h2>
+                </div>
+                <div class="panel-body virtual-card-wrapper">
+                    <p class="panel-desc" id="panel-virtual-desc">Vista de la credencial digital en el portal web oficial del ciudadano.</p>
+                    <div class="virtual-card" id="virtual-card">
+                        <div class="card-bg-patterns"></div>
+                        <div class="card-header-gov">
+                            <div class="gov-title" id="gov-title">REPUBLICA DE OMNILANDIA</div>
+                            <div class="gov-subtitle" id="gov-subtitle">DOCUMENTO NACIONAL DE IDENTIDAD DIGITAL</div>
+                        </div>
+                        
+                        <div class="virtual-card-body">
+                            <div class="photo-container-frame">
+                                <div class="photo-biometric" id="card-photo"></div>
+                            </div>
+
+                            <div class="card-details-grid">
+                                <div class="detail-block">
+                                    <span class="lbl" id="lbl-card-fullname">Apellidos y Nombres</span>
+                                    <span class="val" id="card-name">OBANDO JOQUIN</span>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-block">
+                                        <span class="lbl" id="lbl-card-national-id">ID Origen (DNI)</span>
+                                        <span class="val" id="card-national-id">001-123456-0000A</span>
+                                    </div>
+                                    <div class="detail-block">
+                                        <span class="lbl" id="lbl-card-nationality">Nacionalidad</span>
+                                        <span class="val" id="card-nationality">Nicaragüense</span>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-block">
+                                        <span class="lbl" id="lbl-card-dob">Fecha Nac. (ISO)</span>
+                                        <span class="val" id="card-dob">2000-05-15</span>
+                                    </div>
+                                    <div class="detail-block" style="flex: 0.5;">
+                                        <span class="lbl" id="lbl-card-gender">Género</span>
+                                        <span class="val" id="card-gender">M</span>
+                                    </div>
+                                    <div class="detail-block">
+                                        <span class="lbl" id="lbl-card-omniid">OmniID Soberano</span>
+                                        <span class="val highlight-id" id="card-id">J-382910-K-8392019</span>
+                                    </div>
+                                </div>
+                                <div class="detail-row">
+                                    <div class="detail-block">
+                                        <span class="lbl" id="lbl-card-issue">Emisión</span>
+                                        <span class="val" id="card-issue">2026-05-25</span>
+                                    </div>
+                                    <div class="detail-block">
+                                        <span class="lbl" id="lbl-card-expiry">Expiración</span>
+                                        <span class="val" id="card-expiry">2036-05-25</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="virtual-card-footer">
+                            <div class="detail-block full-width">
+                                <span class="lbl" id="lbl-card-bio-hash">Biometría Hasheada (Fuzzy BCH Cryptographic Commitment)</span>
+                                <span class="val mono-text hash-text" id="card-bio-hash">0x8F9E3D...7A1E4B9C</span>
+                            </div>
+                            <div class="detail-block full-width">
+                                <span class="lbl" id="lbl-card-issuer-sig">Firma Digital del Emisor (PQC ML-DSA-85)</span>
+                                <span class="val mono-text hash-text" id="card-issuer-sig">z6MkmL...yT6G4rD1sH</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-security-toggles">
+                        <span class="label-features">Seguridad Digital Activa:</span>
+                        <div class="toggle-badges">
+                            <span class="sec-badge-active tooltip" data-tooltip="Respaldada por firma post-cuántica ML-DSA-85.">PQC Signature</span>
+                            <span class="sec-badge-active tooltip" data-tooltip="Integración con red descentralizada soberana.">SSI Ready</span>
+                            <span class="sec-badge-active tooltip" id="nfc-badge" data-tooltip="Credencial instalable en el Teléfono Móvil.">Mobile Ready</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-export-actions">
+                        <button class="btn-export" onclick="downloadCardAsJPG()"><span id="btn-dl-jpg">🖼️ Descargar JPG (Cédula)</span></button>
+                        <button class="btn-export" onclick="downloadRegistrationPDF()"><span id="btn-dl-pdf">📄 Descargar PDF (Registro Fiscal)</span></button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- SECCIÓN DERECHA: BILLETERA DIGITAL Y TERMINAL VERIFICADORA -->
+        <div class="dash-column">
+            
+            <!-- PANEL 3: BILLETERA DIGITAL (MOBILE WALLET) -->
+            <section class="dash-panel card-wallet" id="panel-wallet">
+                <div class="panel-header">
+                    <div class="panel-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                    </div>
+                    <h2>3. Billetera Móvil (Mobile ID Wallet)</h2>
+                </div>
+                <div class="panel-body phone-simulator-container">
+                    <div class="phone-frame">
+                        <div class="phone-screen">
+                            <div class="phone-notch"></div>
+                            
+                            <!-- Interfaz de la Billetera -->
+                            <div class="wallet-app-screen" id="wallet-auth-screen">
+                                <div class="wallet-faceid-sim" onclick="unlockWalletWithBiometrics()">
+                                    <svg class="faceid-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path d="M3 7V5a2 2 0 0 1 2-2h2m10 0h2a2 2 0 0 1 2 2v2m0 10v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" stroke-linecap="round"/>
+                                        <path d="M8 10v1m8-1v1" stroke-linecap="round"/>
+                                        <path d="M9 16c.6 1 1.7 1.5 3 1.5s2.4-.5 3-1.5" stroke-linecap="round"/>
+                                        <path d="M12 8v5" stroke-linecap="round"/>
+                                    </svg>
+                                    <span class="auth-text">Validar FaceID / Huella</span>
+                                </div>
+                            </div>
+
+                            <div class="wallet-app-screen hidden" id="wallet-main-screen">
+                                <div class="wallet-app-header">
+                                    <span class="app-title">OmniID Wallet</span>
+                                    <span class="status-shield">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                        Seguro
+                                    </span>
+                                </div>
+
+                                <!-- Tarjeta digital móvil -->
+                                <div class="digital-card-compact">
+                                    <div class="card-compact-head">
+                                        <span class="gov-ref">REPÚBLICA DE OMNILANDIA</span>
+                                        <span class="id-type">CÉDULA DIGITAL</span>
+                                    </div>
+                                    <div class="card-compact-body">
+                                        <div class="compact-photo" id="wallet-photo"></div>
+                                        <div class="compact-info">
+                                            <div class="info-name" id="wallet-name">Joaquin Obando</div>
+                                            <div class="info-id">ID: <span id="wallet-national-id">001-123456-0000A</span></div>
+                                            <div class="info-id" style="color: var(--accent-cyan); font-size: 0.65rem;">OmniID: <span id="wallet-id">J-382910-K-8392019</span></div>
+                                            <div class="info-dob">Nac: <span id="wallet-dob">2000-05-15</span> (<span id="wallet-gender">M</span>)</div>
+                                            <div class="info-age">Nacionalidad: <span id="wallet-nationality">Nicaragüense</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- QR Dinámico -->
+                                <div class="dynamic-qr-box">
+                                    <div class="qr-container">
+                                        <div class="qr-expired-overlay hidden" id="qr-expired-msg">
+                                            <span>Expirado. Regenerando...</span>
+                                        </div>
+                                        <div class="qr-canvas-wrapper" id="qr-placeholder">
+                                            <!-- SVG QR Generado Dinámicamente -->
+                                            <svg id="qr-svg-code" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <!-- Un patrón de QR modular generado dinámicamente -->
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="timer-section">
+                                        <div class="timer-ring-container">
+                                            <svg class="timer-ring" width="36" height="36">
+                                                <circle class="timer-ring-circle-bg" stroke="rgba(255,255,255,0.1)" stroke-width="3" fill="transparent" r="15" cx="18" cy="18"/>
+                                                <circle class="timer-ring-circle" id="timer-indicator" stroke="#10b981" stroke-width="3" fill="transparent" r="15" cx="18" cy="18"/>
+                                            </svg>
+                                            <span class="timer-text" id="timer-seconds">15s</span>
+                                        </div>
+                                        <div class="timer-label">Código QR Dinámico (Offline Token)</div>
+                                    </div>
+                                </div>
+
+                                <div class="wallet-console-box">
+                                    <div class="console-title">Registro de Seguridad (PQC Enclave)</div>
+                                    <div class="console-logs" id="wallet-log-console">
+                                        <div class="log-line text-emerald">[OK] Claves ML-DSA-65 cargadas.</div>
+                                        <div class="log-line text-emerald">[OK] SQLCipher cargado exitosamente.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PANEL 4: VERIFICADOR -->
+            <section class="dash-panel card-verifier" id="panel-verifier">
+                <div class="panel-header">
+                    <div class="panel-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                    <h2>4. Terminal de Verificación (ZKP & DLT)</h2>
+                </div>
+                <div class="panel-body">
+                    <p class="panel-desc">Valide credenciales aplicando Pruebas de Conocimiento Cero (ZKP) sin exponer datos privados.</p>
+                    
+                    <div class="verifier-options">
+                        <span class="label-features">Seleccione Atributo a Verificar:</span>
+                        <div class="rules-grid">
+                            <button class="rule-btn active" id="rule-age" onclick="setVerifyRule('age')">
+                                <span class="rule-title">¿Mayor de 18 años?</span>
+                                <span class="rule-subtitle">ZKP de Rango de Edad</span>
+                            </button>
+                            <button class="rule-btn" id="rule-region" onclick="setVerifyRule('region')">
+                                <span class="rule-title" id="rule-region-title">¿Residente en Managua?</span>
+                                <span class="rule-subtitle" id="rule-region-sub">ZKP de Atributo de Residencia</span>
+                            </button>
+                            <button class="rule-btn" id="rule-full" onclick="setVerifyRule('full')">
+                                <span class="rule-title" id="rule-full-title">Identidad Completa</span>
+                                <span class="rule-subtitle" id="rule-full-sub">Revelación Selectiva Completa</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="verifier-actions">
+                        <button class="btn-glow btn-accent" onclick="startVerificationScan()">
+                            <span id="btn-scan-qr">Escanear QR Dinámico y Validar en Ledger</span>
+                            <div class="btn-glow-bg"></div>
+                        </button>
+                    </div>
+
+                    <!-- Resultado de la verificación -->
+                    <div class="verification-result-box hidden" id="verify-result-box">
+                        <div class="result-status-banner" id="verify-banner">
+                            <span class="banner-text" id="verify-banner-text">VERIFICADO CON ÉXITO</span>
+                        </div>
+                        <div class="verify-data-disclosed">
+                            <div class="data-row">
+                                <span class="data-label">Atributo Solicitado:</span>
+                                <span class="data-val highlight" id="verify-disclosed-req">ZKP Mayor de 18</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Prueba Criptográfica:</span>
+                                <span class="data-val text-emerald font-mono" id="verify-disclosed-proof">Lattice-based SD-JWT Verified</span>
+                            </div>
+                            <div class="data-row" id="row-raw-dob">
+                                <span class="data-label">Fecha Nacimiento Revelada:</span>
+                                <span class="data-val font-mono redact-text" id="verify-disclosed-dob">[OCULTO - PROBADO POR ZKP]</span>
+                            </div>
+                            <div class="data-row" id="row-raw-region">
+                                <span class="data-label">Ubicación Revelada:</span>
+                                <span class="data-val font-mono redact-text" id="verify-disclosed-region">[OCULTO - PROBADO POR ZKP]</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Terminal log output -->
+                    <div class="terminal-box">
+                        <div class="terminal-head">
+                            <span id="term-title">Consola de Auditoría de Seguridad (Zero Trust)</span>
+                            <button class="btn-clear-term" onclick="clearTerminal()">Limpiar</button>
+                        </div>
+                        <div class="terminal-body font-mono" id="verifier-terminal-log">
+                            <div class="term-line text-muted">[SISTEMA] Iniciando terminal verificadora...</div>
+                            <div class="term-line text-muted">[SISTEMA] Algoritmos cargados: ML-DSA-85 (Firmas), ML-KEM-1024 (Intercambio).</div>
+                            <div class="term-line text-muted">[SISTEMA] Conectado a Ledger DLT did:omni VDR.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <p>OmniID es una especificación técnica de Identidad Soberana. Diseñado por Arquitectura de Sistemas Globales de Élite.</p>
+        <p>Criptografía Post-Cuántica (PQC) certificada bajo lineamientos de transición NIST FIPS 203/204. Licencia MIT.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="translations.js"></script>
+    <script src="app.js"></script>
+    <!-- GDPR Cookie Consent Banner -->
+    <script src="cookie-banner.js"></script>
+</body>
+</html>
