@@ -1,0 +1,125 @@
+# OmniID Commercial License Agreement
+
+**Version 1.0**
+**Effective Date: 2024**
+
+---
+
+## 1. GRANT OF RIGHTS
+
+Subject to the terms and conditions of this Agreement, the Licensor grants to the Licensee a non-exclusive, non-transferable, revocable license to:
+
+- ✅ Use the OmniID Software (including source code)
+- ✅ Modify the Software for internal use
+- ✅ Deploy the Software in production environments
+- ✅ Integrate the Software into proprietary systems
+- ✅ Distribute modified versions without source code disclosure
+
+---
+
+## 2. LICENSE RESTRICTIONS
+
+The Licensee **shall not**:
+
+- ❌ Redistribute, resell, or sublicense the Software without written permission
+- ❌ Remove or modify copyright, patent, trademark, or proprietary notices
+- ❌ Use the Software to develop competing products
+- ❌ Publicly disclose the Software's source code or modifications
+- ❌ Share this license with third parties without authorization
+
+---
+
+## 3. SUPPORT & MAINTENANCE
+
+This Commercial License includes:
+
+- **Email Support**: Technical assistance within 48 business hours
+- **Bug Fixes**: Priority resolution of critical security issues
+- **Updates**: Access to non-breaking updates and patches
+- **Documentation**: Private API documentation and integration guides
+
+*Additional services (custom development, consulting) available upon request.*
+
+---
+
+## 4. TERM & TERMINATION
+
+- **Initial Term**: 1 year from the effective date
+- **Renewal**: Automatic annual renewal unless terminated
+- **Termination**: Either party may terminate with 30 days' written notice
+- **Effect of Termination**: All rights terminate; existing deployments remain operational
+
+---
+
+## 5. FEES
+
+Annual License Fee: **[To be negotiated]**
+
+Payment Terms:
+- Annual billing
+- Due within 30 days of invoice
+- Invoiced on renewal date
+
+---
+
+## 6. CONFIDENTIALITY
+
+Both parties agree to maintain the confidentiality of:
+
+- OmniID's proprietary algorithms and cryptographic implementations
+- Modified source code developed under this license
+- Commercial terms of this Agreement
+
+---
+
+## 7. WARRANTIES & DISCLAIMERS
+
+### Licensor Warrants:
+
+- ✅ OmniID is free from malicious code
+- ✅ Licensor has authority to grant this license
+- ✅ OmniID does not infringe third-party intellectual property rights
+
+### Disclaimer:
+
+**EXCEPT AS EXPRESSLY STATED ABOVE, THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. THE LICENSOR DISCLAIMS ALL WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.**
+
+---
+
+## 8. LIMITATION OF LIABILITY
+
+In no event shall the Licensor be liable for:
+
+- Indirect, incidental, special, consequential, or punitive damages
+- Loss of data, revenue, or profits
+- Business interruption or loss of use
+
+**Maximum Liability**: Limited to fees paid in the 12 months preceding the claim
+
+---
+
+## 9. GOVERNANCE
+
+This Agreement is governed by and construed in accordance with the laws of **[Jurisdiction to be specified]**, without regard to its conflict of law principles.
+
+---
+
+## 10. CONTACT & INQUIRIES
+
+For questions regarding this Commercial License:
+
+📧 **Email**: contact@omniid.io
+🌐 **Website**: https://omniid.io
+📞 **Support**: https://omniid.io/support
+
+---
+
+## 11. AMENDMENT
+
+OmniID reserves the right to update this Commercial License. Material changes require written notice with 30 days' opportunity to terminate.
+
+---
+
+**THIS IS A TEMPLATE. ACTUAL COMMERCIAL LICENSES WILL BE CUSTOMIZED PER CLIENT NEEDS.**
+
+For a finalized agreement, contact the OmniID licensing team.
