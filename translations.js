@@ -41,7 +41,13 @@ const translations = {
         pdf_desc1: "Se hace constar por medio del presente documento la emisión exitosa de la identidad",
         pdf_desc2: "soberana post-cuántica, vinculada criptográficamente al ciudadano registrado.",
         pdf_footer1: "Firma Criptográfica PQC (ML-DSA-85):",
-        pdf_footer2: "SELLO DE AUTORIDAD CERTIFICADORA FISCAL"
+        pdf_footer2: "SELLO DE AUTORIDAD CERTIFICADORA FISCAL",
+        log_init: "Iniciando infraestructura de criptografía post-cuántica...",
+        log_keys: "Generando claves raíz XMSS en la DLT federada...",
+        log_ready: "OmniID Engine LISTO.",
+        log_fallback: "[SISTEMA] Backend no detectado. Usando simulación local...",
+        alert_mint_first: "Por favor acuñe una credencial primero en la sección 1.",
+        years: "años"
     },
     en: {
         title_main: "OmniID Sovereign",
@@ -85,7 +91,13 @@ const translations = {
         pdf_desc1: "This document certifies the successful issuance of the post-quantum",
         pdf_desc2: "sovereign identity, cryptographically linked to the registered citizen.",
         pdf_footer1: "PQC Cryptographic Signature (ML-DSA-85):",
-        pdf_footer2: "FISCAL CERTIFYING AUTHORITY SEAL"
+        pdf_footer2: "FISCAL CERTIFYING AUTHORITY SEAL",
+        log_init: "Starting post-quantum cryptography infrastructure...",
+        log_keys: "Generating XMSS root keys on federated DLT...",
+        log_ready: "OmniID Engine READY.",
+        log_fallback: "[SYSTEM] Backend not detected. Using local simulation...",
+        alert_mint_first: "Please mint a credential first in section 1.",
+        years: "years"
     },
     fr: {
         title_main: "OmniID Souverain",
@@ -354,6 +366,11 @@ const translations = {
 };
 
 window.currentLang = 'es';
+
+window.getT = function(key) {
+    if (!translations[window.currentLang]) return translations['es'][key] || key;
+    return translations[window.currentLang][key] || translations['es'][key] || key;
+};
 
 // Map element IDs to translation keys
 const idMap = {

@@ -2,6 +2,8 @@ import { Router, Request, Response } from 'express';
 import { FormatPreservingEngine } from '../crypto/fpe';
 import { PQCEngine, FuzzyCommitment } from '../crypto/pqc';
 import * as crypto from 'crypto';
+import { E2EEServerKeys } from '../crypto/key-exchange';
+import { z } from 'zod';
 
 export const identityRouter = Router();
 
@@ -20,6 +22,28 @@ let dbCounter = 4892013; // Starting database counter
 
 // Generamos llaves maestras del Emisor Nacional (PQC) al levantar el servidor
 const ISSUER_KEYPAIR = PQCEngine.generateKeyPair();
+
+/**
+ * Zod Schema for input validation
+ */
+const identitySchema = z.object({
+    fullName: z.string().min(3).max(100),
+    dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    region: z.string().min(2).max(50),
+    nationalId: z.string().max(20).optional(),
+    nationality: z.string().max(50).optional(),
+    gender: z.string().max(20).optional()
+});
+
+/**
+ * Endpoint para obtener la llave pública RSA del servidor (Intercambio E2EE)
+ */
+identityRouter.get('/keys', (req: Request, res: Response) => {
+    res.json({
+        success: true,
+        publicKeyPEM: E2EEServerKeys.publicKey
+    });
+});
 
 /**
  * Endpoint de estado de la red (Health & DLT Connectivity)
@@ -42,14 +66,41 @@ import { supabase } from '../services/supabaseClient';
  */
 identityRouter.post('/issue', async (req: Request, res: Response) => {
     try {
-        const { fullName, dob, region, nationalId, nationality, gender, biometricTemplate } = req.body;
+        const { encryptedPayload, iv, encryptedAesKey, publicKey, biometricHash } = req.body;
         
-        if (!fullName || !dob || !region || !biometricTemplate || !Array.isArray(biometricTemplate)) {
+        if (!encryptedPayload || !iv || !encryptedAesKey || !publicKey || !biometricHash) {
             return res.status(400).json({ 
                 success: false, 
-                error: "Datos de enrolamiento incompletos o biometría inválida." 
+                error: "Petición rechazada. Datos de enrolamiento E2EE incompletos." 
             });
         }
+
+        // 0. Descifrar la llave AES envuelta usando la llave privada RSA del servidor
+        let aesKeyBuffer: Buffer;
+        try {
+            aesKeyBuffer = E2EEServerKeys.decryptAESKey(encryptedAesKey);
+        } catch (err) {
+            return res.status(401).json({ success: false, error: "Fallo criptográfico: Invalid Key Wrap." });
+        }
+
+        // 1. Descifrar el payload E2EE usando la llave AES-GCM recuperada
+        const decipher = crypto.createDecipheriv('aes-256-gcm', aesKeyBuffer, Buffer.from(iv, 'hex'));
+        const ciphertextBuf = Buffer.from(encryptedPayload, 'hex');
+        const tag = ciphertextBuf.slice(ciphertextBuf.length - 16);
+        const actualCiphertext = ciphertextBuf.slice(0, ciphertextBuf.length - 16);
+        decipher.setAuthTag(tag);
+        
+        let decryptedStr = decipher.update(actualCiphertext, undefined, 'utf8');
+        decryptedStr += decipher.final('utf8');
+        
+        // 2. Validar con Zod para prevenir inyecciones o datos malformados
+        const plainData = JSON.parse(decryptedStr);
+        const parsed = identitySchema.safeParse(plainData);
+        if (!parsed.success) {
+            return res.status(400).json({ success: false, error: "Fallo de validación de esquema de datos (Posible manipulación)." });
+        }
+        
+        const { fullName, dob, region, nationalId, nationality, gender } = parsed.data;
 
         // 1. Incrementar contador de DLT
         dbCounter++;
@@ -58,11 +109,11 @@ identityRouter.post('/issue', async (req: Request, res: Response) => {
         const { id: omniID } = FormatPreservingEngine.generateID(dbCounter);
         const did = `did:omni:${omniID}`;
 
-        // 3. Crear Fuzzy Commitment biométrico dactilar
-        const fuzzyCommitment = PQCEngine.createFuzzyCommitment(biometricTemplate);
+        // 3. Crear Fuzzy Commitment usando el hash provisto por el cliente
+        const fuzzyCommitment = { hash: biometricHash, parity: "mock-parity-data" };
 
-        // 4. Generar par de llaves ML-DSA para el dispositivo del usuario
-        const userKeys = PQCEngine.generateKeyPair();
+        // 4. Usar la llave pública proveída por el cliente en lugar de generar una
+        const userKeys = { publicKey, privateKey: "kept_securely_on_client" };
 
         // 5. Crear la credencial W3C en formato SD-JWT firmada por el Emisor
         const claims = {
@@ -131,7 +182,8 @@ identityRouter.post('/issue', async (req: Request, res: Response) => {
             }
         });
     } catch (err: any) {
-        res.status(500).json({ success: false, error: err.message });
+        console.error("[AUDIT] Error interno procesando credencial:", err.message);
+        res.status(500).json({ success: false, error: "Error interno del servidor. Operación abortada." });
     }
 });
 

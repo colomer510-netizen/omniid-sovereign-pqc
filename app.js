@@ -24,10 +24,10 @@ const COLORS = {
 
 // Initialize Application
 document.addEventListener("DOMContentLoaded", () => {
-    logTerminal("Iniciando infraestructura de criptografía post-cuántica...", COLORS.info);
-    logTerminal("Generando claves raíz XMSS en la DLT federada...", COLORS.system);
+    logTerminal(window.getT("log_init"), COLORS.info);
+    logTerminal(window.getT("log_keys"), COLORS.system);
     logTerminal("Estableciendo conexión segura Zero Trust en puerto local...", COLORS.system);
-    logTerminal("OmniID Engine LISTO.", COLORS.ok);
+    logTerminal(window.getT("log_ready"), COLORS.ok);
     
     // Enroll default user to showcase something initially
     enrollUser();
@@ -40,7 +40,7 @@ function logTerminal(message, colorClass = COLORS.system) {
     const time = new Date().toLocaleTimeString();
     const line = document.createElement("div");
     line.className = `term-line ${colorClass}`;
-    line.innerHTML = `[${time}] ${message}`;
+    line.textContent = `[${time}] ${message}`;
     term.appendChild(line);
     term.scrollTop = term.scrollHeight;
 }
@@ -127,6 +127,92 @@ function triggerBioScan() {
     }, 1500);
 }
 
+// --- Web Crypto API Integration (E2EE & Real Cryptography) ---
+
+async function generateRealHash(dataArray) {
+    const data = new Uint8Array(dataArray);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return "0x" + hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+
+async function generateUserKeys() {
+    const keyPair = await crypto.subtle.generateKey(
+        { name: "ECDSA", namedCurve: "P-384" },
+        true,
+        ["sign", "verify"]
+    );
+    const exportedPublicKey = await crypto.subtle.exportKey("spki", keyPair.publicKey);
+    const exportedPublicKeyBuffer = new Uint8Array(exportedPublicKey);
+    const pubKeyBase64 = btoa(String.fromCharCode.apply(null, exportedPublicKeyBuffer));
+    return { keyPair, pubKeyBase64 };
+}
+
+async function encryptPayloadE2EE(dataObj) {
+    const aesKey = await crypto.subtle.generateKey(
+        { name: "AES-GCM", length: 256 },
+        true,
+        ["encrypt", "decrypt"]
+    );
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encoder = new TextEncoder();
+    const encodedData = encoder.encode(JSON.stringify(dataObj));
+    const ciphertextBuffer = await crypto.subtle.encrypt(
+        { name: "AES-GCM", iv: iv },
+        aesKey,
+        encodedData
+    );
+    const ciphertextArray = Array.from(new Uint8Array(ciphertextBuffer));
+    const ciphertextHex = ciphertextArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    const rawAesKey = await crypto.subtle.exportKey("raw", aesKey);
+    
+    // FETCH BACKEND PUBLIC KEY
+    let rsaPubKey;
+    try {
+        const keyRes = await fetch("http://localhost:3000/api/v1/identities/keys");
+        const keyData = await keyRes.json();
+        const pem = keyData.publicKeyPEM;
+        
+        // Parse PEM to ArrayBuffer
+        const pemHeader = "-----BEGIN PUBLIC KEY-----";
+        const pemFooter = "-----END PUBLIC KEY-----";
+        const pemContents = pem.replace(pemHeader, "").replace(pemFooter, "").replace(/\s/g, '');
+        const binaryDerString = window.atob(pemContents);
+        const binaryDer = new Uint8Array(binaryDerString.length);
+        for (let i = 0; i < binaryDerString.length; i++) {
+            binaryDer[i] = binaryDerString.charCodeAt(i);
+        }
+        
+        rsaPubKey = await crypto.subtle.importKey(
+            "spki",
+            binaryDer.buffer,
+            { name: "RSA-OAEP", hash: "SHA-256" },
+            true,
+            ["encrypt"]
+        );
+        logTerminal("[WEB CRYPTO] Llave pública RSA del backend importada exitosamente.", COLORS.ok);
+    } catch (e) {
+        logTerminal("[ERR] No se pudo obtener la llave pública RSA del servidor.", COLORS.error);
+        throw e;
+    }
+
+    // ENCRYPT AES KEY WITH RSA-OAEP
+    logTerminal("[WEB CRYPTO] Envolviendo llave AES con RSA-OAEP...", COLORS.system);
+    const encryptedAesKeyBuf = await crypto.subtle.encrypt(
+        { name: "RSA-OAEP" },
+        rsaPubKey,
+        rawAesKey
+    );
+    const encryptedAesKeyBase64 = window.btoa(String.fromCharCode(...new Uint8Array(encryptedAesKeyBuf)));
+
+    const ivHex = Array.from(iv).map(b => b.toString(16).padStart(2, '0')).join('');
+
+    return { ciphertextHex, ivHex, encryptedAesKey: encryptedAesKeyBase64 };
+}
+
+// -----------------------------------------------------------
+
 // Enroll / Issue Credential
 async function enrollUser() {
     const fullName = document.getElementById("input-fullname").value.trim() || "Joaquin Obando";
@@ -138,29 +224,52 @@ async function enrollUser() {
     
     const bioTemplate = state.simulatedBioTemplate || Array.from({length: 8}, () => Math.floor(Math.random() * 256));
     
+    logTerminal("[WEB CRYPTO] Generando par de llaves asimétricas ECDSA P-384...", COLORS.system);
+    const { keyPair, pubKeyBase64 } = await generateUserKeys();
+    logTerminal(`[WEB CRYPTO] Llave pública generada: ${pubKeyBase64.substring(0, 40)}...`, COLORS.ok);
+    
+    logTerminal("[WEB CRYPTO] Encriptando payload con AES-GCM (E2EE)...", COLORS.system);
+    const payloadToEncrypt = { fullName, dob: dobInput, region, nationalId, nationality, gender };
+    const { ciphertextHex, ivHex, encryptedAesKey } = await encryptPayloadE2EE(payloadToEncrypt);
+    logTerminal(`[WEB CRYPTO] Ciphertext: ${ciphertextHex.substring(0, 40)}...`, COLORS.ok);
+
+    const realBioHash = await generateRealHash(bioTemplate);
+    logTerminal(`[WEB CRYPTO] Hash biométrico SHA-256 generado.`, COLORS.ok);
+
     logTerminal("Iniciando acuñación de credencial PQC con el servidor...", COLORS.system);
     
+    let data;
     try {
         const response = await fetch("http://localhost:3000/api/v1/identities/issue", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                fullName,
-                dob: dobInput,
-                region,
-                nationalId,
-                nationality,
-                gender,
-                biometricTemplate: bioTemplate
+                encryptedPayload: ciphertextHex,
+                iv: ivHex,
+                encryptedAesKey: encryptedAesKey,
+                publicKey: pubKeyBase64,
+                biometricHash: realBioHash
             })
         });
         
-        const data = await response.json();
-        
-        if (!data.success) {
-            logTerminal(`[ERR] Fallo de enrolamiento: ${data.error}`, COLORS.error);
-            return;
-        }
+        data = await response.json();
+    } catch (e) {
+        logTerminal(window.getT("log_fallback"), COLORS.warn);
+        const mockId = generateFormatPreservingID(state.userCount++);
+        data = {
+            success: true,
+            omniID: mockId,
+            did: `did:omni:vdr:${mockId.toLowerCase()}`,
+            fuzzyCommitment: { hash: realBioHash },
+            credential: { jwt: `eyJhbGciOiJNTFBEU0E4NSIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb2NrIn0.z6MkmLmQ8...yT6G4rD1sH`, disclosures: [] },
+            userKeys: { publicKey: pubKeyBase64 }
+        };
+    }
+    
+    if (!data.success) {
+        logTerminal(`[ERR] Fallo de enrolamiento: ${data.error}`, COLORS.error);
+        return;
+    }
 
         const issueDate = new Date().toISOString().split('T')[0];
         const expiryDate = new Date(new Date().setFullYear(new Date().getFullYear() + 10)).toISOString().split('T')[0];
@@ -303,7 +412,7 @@ function finishWalletUnlock() {
         // Dynamic age calculation
         if (state.currentUser.dob) {
             const age = calculateAge(state.currentUser.dob);
-            document.getElementById("wallet-age").innerText = `${age} años`;
+            document.getElementById("wallet-age").innerText = `${age} ${window.getT("years")}`;
         }
     }
     
@@ -493,7 +602,7 @@ function setVerifyRule(rule) {
 // Start Verification Scan via Backend API
 function startVerificationScan() {
     if (!state.currentUser) {
-        alert("Por favor acuñe una credencial primero en la sección 1.");
+        alert(window.getT("alert_mint_first"));
         return;
     }
     
@@ -512,6 +621,7 @@ function startVerificationScan() {
         logTerminal("QR escaneado exitosamente.", COLORS.ok);
         logTerminal("Enviando petición ZKP / SD al backend de verificación...", COLORS.system);
         
+        let data;
         try {
             const response = await fetch("http://localhost:3000/api/v1/identities/verify", {
                 method: "POST",
@@ -526,9 +636,31 @@ function startVerificationScan() {
                 })
             });
             
-            const data = await response.json();
+            data = await response.json();
+        } catch (e) {
+            logTerminal(`[SISTEMA] Backend no detectado. Simulando verificación ZKP localmente...`, COLORS.warn);
+            let approved = false;
+            let disclosedClaims = {};
+            if (rule === 'age') {
+                const age = calculateAge(user.dob);
+                approved = age >= 18;
+            } else if (rule === 'region') {
+                approved = user.region.toLowerCase().includes('managua');
+            } else {
+                approved = true;
+                disclosedClaims = { dob: user.dob, region: user.region };
+            }
+
+            data = {
+                success: true,
+                approved: approved,
+                logs: ["[OK] Validación criptográfica simulada exitosamente.", `[OK] Regla ZKP '${rule}' procesada.`],
+                disclosedClaims: disclosedClaims,
+                error: approved ? null : "El atributo no cumple la política requerida."
+            };
+        }
             
-            // Print backend logs to terminal
+        // Print backend logs to terminal
             if (data.logs && Array.isArray(data.logs)) {
                 data.logs.forEach(msg => {
                     const colorClass = msg.includes("[ERR]") ? COLORS.error 
